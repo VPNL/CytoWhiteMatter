@@ -1,0 +1,124 @@
+---
+title: "fascicle classification by roi"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+library("tidyverse")
+source("../utils/cor_mat_functions.R")
+
+df = read_csv("../../data/endpoint_classification.csv",
+              col_types = cols())
+```
+
+```{r}
+# filter for the ROI classification
+df <- 
+  df %>% 
+  filter(classified_by == 'ROI')
+
+```
+
+```{r}
+# calculate the means for reporting
+df %>% 
+  group_by(Group) %>% 
+  summarize(mean_accuracy = mean(Accuracy),
+            sd_accuracy = sd(Accuracy))
+```
+
+```{r}
+# test whether we can classify above chance for roi
+
+roi_kid <- 
+df %>% 
+  filter(Group == 'Children') %>% 
+  select(Accuracy) 
+  
+t.test(roi_kid,mu=25)
+
+roi_adult <- 
+df %>% 
+  filter(Group == 'Adults') %>% 
+  select(Accuracy) 
+  
+t.test(roi_adult,mu=25)
+
+
+```
+
+```{r}
+# test whether classification accuraccy differed across functional ROIs and subject 
+df %>% 
+  lmerTest::lmer(.,formula = Accuracy ~ actual_label * Group + (1|subject)) %>% 
+  anova()
+```
+
+```{r}
+# stats on off diagonal 
+
+# count how many timies each connectivity profile was predicted as each 
+# other connectivity profile
+counts <-
+df %>% 
+  group_by(actual_label,predicted_label,Group) %>% 
+  count()  %>% 
+  ungroup() %>%
+    complete(actual_label, predicted_label,Group, fill = list(n = 0))
+
+# just select the off diagonal values (i.e., when the classifier was wrong)
+df.off_diagonal  <- 
+  counts %>% 
+  filter(!actual_label == predicted_label)
+
+# get the total number of connectivity profiles for each ROI to normalize the  counts 
+total_counts <- 
+  df %>% 
+  group_by(actual_label,Group) %>% 
+  count() %>% 
+  mutate(total_n = n) %>% 
+  select(actual_label,total_n)
+
+df.off_diagonal <-merge(df.off_diagonal,total_counts)
+
+# code the actual and predicted cyto and category of each ROI
+df.off_diagonal <-
+df.off_diagonal %>% 
+  mutate(cyto_actual = recode(actual_label, 
+                       "mFus-faces" = 'FG4',
+                       "pFus-faces" = 'FG2',
+                       "mOTS-words" = 'FG4',
+                       "pOTS-words" = 'FG2'),
+         category_actual = recode(actual_label, 
+                       "mFus-faces" = 'face',
+                       "pFus-faces" = 'face',
+                       "mOTS-words" = 'word',
+                       "pOTS-words" = 'word'),
+         cyto_predicted = recode(predicted_label, 
+                       "mFus-faces" = 'FG4',
+                       "pFus-faces" = 'FG2',
+                       "mOTS-words" = 'FG4',
+                       "pOTS-words" = 'FG2'),
+         category_predicted = recode(predicted_label, 
+                       "mFus-faces" = 'face',
+                       "pFus-faces" = 'face',
+                       "mOTS-words" = 'word',
+                       "pOTS-words" = 'word'),
+         proportion = n/total_n) %>% 
+  mutate(same_cyto = (cyto_actual == cyto_predicted),
+         same_category = (category_actual == category_predicted))
+```
+
+```{r}
+# fit the LM
+lm(formula = 'proportion ~ same_cyto * same_category * Group',data=df.off_diagonal) %>% 
+  anova()
+```
+
+
+
+
+

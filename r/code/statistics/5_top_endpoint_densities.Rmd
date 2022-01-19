@@ -1,0 +1,80 @@
+---
+title: "top endpoint densities"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+library("tidyverse")
+
+df = read_csv("../../data/endpoint_data.csv",
+              col_types = cols())
+```
+
+
+```{r}
+# get the top endpoints for children
+df %>% 
+  filter(group == "kid",
+         roi == "mFus-faces") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+df %>% 
+  filter(group == "kid",
+         roi == "mOTS-words") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+df %>% 
+  filter(group == "kid",
+         roi == "pFus-faces") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+df %>% 
+  filter(group == "kid",
+         roi == "pOTS-words") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+```
+
+```{r}
+# get the top endpoints for adults 
+
+df %>% 
+  filter(group == "adult",
+         roi == "mFus-faces") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+df %>% 
+  filter(group == "adult",
+         roi == "mOTS-words") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+df %>% 
+  filter(group == "adult",
+         roi == "pFus-faces") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+df %>% 
+  filter(group == "adult",
+         roi == "pOTS-words") %>% 
+  group_by(atlas_roi) %>% 
+  summarise(mean_ep = mean(endpoint_proportion)) %>% 
+  arrange(desc(mean_ep))
+
+```

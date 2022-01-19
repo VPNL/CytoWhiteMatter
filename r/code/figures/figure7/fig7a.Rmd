@@ -1,0 +1,44 @@
+---
+title: "Fig 7A"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions 
+source("endpoint_line_plot.R")
+library("tidyverse")
+
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/endpoint_data.csv')
+df.wide <- read.csv('../../../data/endpoint_data_wide.csv')
+```
+
+```{r}
+# get the list of glasser rois ordered by lobe 
+foo <- fct_reorder(df$atlas_roi,df$lobe,min)
+tmp <- levels(foo)
+
+df.atlas_codes <- tibble(atlas_roi = tmp,
+                         roi_code = 1:180)
+
+df <- merge(df,df.atlas_codes,by="atlas_roi")
+```
+
+
+```{r}
+# make the plot 
+endpoint_line_plot(df,"kid")+ggtitle("Children")
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig7a.png"),
+        width = 2.5,
+         height = 5)
+```

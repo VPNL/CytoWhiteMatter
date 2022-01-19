@@ -1,0 +1,32 @@
+---
+title: "Fig 4"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+source("../../utils/classification_plot.R")
+library("tidyverse")
+
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/fascicle_classification.csv')
+```
+
+```{r}
+# make the plot 
+df %>% 
+  classification_plot()
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig4.png"),
+        width = 4,
+         height = 4)
+```

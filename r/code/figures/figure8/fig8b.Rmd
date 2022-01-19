@@ -1,0 +1,170 @@
+---
+title: "Fig 8B"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+
+```{r}
+# load in relevant functions & packages 
+library("ggcorrplot")
+library("viridis")
+library("patchwork")
+library("tidyverse")
+```
+
+
+```{r}
+# read in the data 
+df = read_csv("../../../data/endpoint_classification.csv",
+              col_types = cols())
+
+```
+
+```{r}
+make_cmat = function(df, agegroup) {
+  # make_cmat: 
+  # inputs : df - tibble with actual labels, predicted labels, age group 
+  #          agegroup - 'Children' or 'Adults'
+  # 
+  # outputs: cmat - confusion matrix where the columns sum to 100 
+  #
+  # 
+  df <-
+    df %>%
+    filter(classified_by == 'ROI',
+           Group == agegroup)
+  
+  # count how many times each actual label was predicted as each other label
+  df.count <-
+    df %>%
+    modify_if(is.character, as.factor) %>%
+    group_by(actual_label, predicted_label) %>%
+    count() %>%
+    ungroup() %>%
+    complete(actual_label, predicted_label, fill = list(n = 0))
+  
+  # assign a numerical code to the four ROIs to make the matrix
+  df.count <-
+    df.count %>%
+    mutate(
+      a_label_code =
+        recode(
+          actual_label,
+          'mFus-faces' = '1',
+          'mOTS-words' = '2',
+          'pFus-faces' = '3',
+          'pOTS-words' = '4'
+        ),
+      p_label_code =
+        recode(
+          predicted_label,
+          'mFus-faces' = '1',
+          'mOTS-words' = '2',
+          'pFus-faces' = '3',
+          'pOTS-words' = '4'
+        )
+    )
+  
+  # loop over the indices and fill in
+  cmat <- matrix(, nrow = 4, ncol = 4)
+  for (a in 1:4) {
+    for (p in 1:4) {
+      tmp <-
+        df.count %>%
+        filter(a_label_code == a,
+               p_label_code == p)
+      
+      cmat[a, p] = tmp$n
+      
+    }
+  }
+  
+  # assign row and column names "a = actual", "p = predicted"
+  colnames(cmat) <-
+    c("mFus-faces",
+      "mOTS-words",
+      "pFus-faces",
+      "pOTS-words") #actual
+  rownames(cmat) <-
+    c("mFus-faces",
+      "mOTS-words",
+      "pFus-faces",
+      "pOTS-words") #predicted
+  
+  # sum rows and divide by the sum
+  cmat_sums = rowSums(cmat)
+  normalized_cmat = (cmat / cmat_sums) * 100
+  
+  # return the normalized cmat
+  normalized_cmat
+}
+```
+
+```{r}
+kid_cmat <- make_cmat(df,'Children')
+adult_cmat <- make_cmat(df,'Adults')
+```
+
+```{r}
+cmat_plot = function(cmat,legend){
+  
+  p <- ggcorrplot(cmat,
+           lab = TRUE,
+           lab_size = 2,
+           tl.cex = 10) +
+  scale_fill_viridis(limits = c(0, 90),
+                     name = "Percentage") +
+  annotate("segment",
+           x = .6, xend = 2.4, y = .3, yend = .3,
+           size = 2, color = "magenta") +
+  annotate("segment",
+           x = 2.6, xend = 4.4, y = .3, yend = .3,
+           size = 2, color = "cyan") +
+  annotate("segment",
+           x = .3, xend = .3, y = .6, yend = 2.4,
+           size = 2, color = "magenta") +
+  annotate("segment",
+           x = .3, xend = .3, y = 2.6, yend = 4.4,
+           size = 2, color = "cyan")
+  
+  if (legend == 1){
+  p+
+  theme(text = element_text(size =14),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        #legend.position = "none",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+  }
+  else{
+    p+ 
+       theme(text = element_text(size =14),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        legend.position = "none",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+  }
+
+}
+```
+
+
+```{r}
+# make the plots
+a <- cmat_plot(kid_cmat,0)+ggtitle("Children")
+b <- cmat_plot(adult_cmat,1)+ggtitle("Adults")
+a+b
+```
+
+```{r}
+# save to figures folder
+ggsave(filename = 
+           paste0("fig8b.png"),
+         width = 6,
+        height = 3)
+```

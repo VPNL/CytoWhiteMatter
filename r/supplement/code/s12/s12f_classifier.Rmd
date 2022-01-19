@@ -1,0 +1,24 @@
+---
+title: "s12b classifier"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & data 
+library("tidyverse")
+source("../../../code/classifier/fascicle_correlation_classifier.R")
+df <- read.csv('../../data/fascicle_data_motion_excluded_wide.csv')
+```
+
+```{r}
+roilist = c("mFus-faces","mOTS-words","pFus-faces","pOTS-words")
+hemi = 'lh'
+df.classification = fascicle_classifier_wrapper(df,hemi,roilist)
+```
+
+```{r}
+write_csv(df.classification,"../../data/s12f_classification.csv")
+```
+

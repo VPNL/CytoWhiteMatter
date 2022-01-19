@@ -1,0 +1,86 @@
+---
+title: "fascicle correlations"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+library("tidyverse")
+source("../utils/cor_mat_functions.R")
+
+df = read_csv("../../data/fascicle_data.csv",
+              col_types = cols())
+```
+
+```{r}
+# turn columns into factors 
+df <-
+  df %>% 
+  mutate(subject = as.factor(subject),
+         hem = as.factor(hem),
+         roi = as.factor(roi),
+         cyto = as.factor(cyto),
+         domain = as.factor(domain),
+         group = as.factor(group),
+         tract = as.factor(tract))
+  
+```
+
+
+```{r}
+# get the average correlations for reporting 
+
+roipairs = list(c('mFus-faces','mOTS-words'),
+                c('pFus-faces','pOTS-words'),
+                c('mFus-faces','pFus-faces'),
+                c('mOTS-words','pOTS-words'))
+comparison_labs = c("same_cyto","same_cyto","same_domain","same_domain")
+
+group = c("kid","adult")
+
+for (i in 1:length(roipairs)) {
+  for (g in group) {
+    if ((i == 1) && (g == "kid")) {
+      df.comparison <-
+        tibble(
+          func_corrrelations_across_subs(df, roipairs[[i]], 'lh',0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+    }
+    else{
+      df.tmp <-
+        tibble(
+          func_corrrelations_across_subs(df, roipairs[[i]], 'lh', 0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+      df.comparison <- rbind(df.comparison, df.tmp)
+    }
+  }
+}
+
+df.comparison %>% 
+  group_by(roipair,group) %>% 
+  summarize(mean_corr = mean(correlation),
+            sd_corr = sd(correlation))
+```
+
+```{r}
+# fit the lmm anova 
+df.comparison %>% 
+  mutate(shared_factor = as.factor(comparison),
+         group = as.factor(group)) %>% 
+  lmerTest::lmer(.,formula = correlation ~ shared_factor * group + (1|subject)) %>% 
+  anova()
+```
+
+
+
+

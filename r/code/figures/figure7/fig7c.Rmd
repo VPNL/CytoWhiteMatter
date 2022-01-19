@@ -1,0 +1,36 @@
+---
+title: "Fig 7C"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+source("../../utils/cor_mat_functions.R")
+library("tidyverse")
+
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/endpoint_data.csv')
+df.wide <- read.csv('../../../data/endpoint_data_wide.csv')
+```
+
+```{r}
+# set the roi list 
+roilist <- c('mOTS-words','mFus-faces','pOTS-words','pFus-faces')
+
+#  make the correlation matrix 
+func_correlation_matrix_across_subs(df,"kid",roilist,'lh',sc,1) 
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig7c.png"),
+        width = 4,
+         height = 4)
+```
+
