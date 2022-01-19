@@ -8,7 +8,7 @@ Code relating to figures and statistical tests, and data analyses is provided in
 
 `matlab/` contains the matlab code used to generate Figures 1B, 2A, and 6 and Supplementary Figures 1-8. 
 
-'r/code` folder contains the R code used to generate all other figures and statistics in the 'figures/' and 'statistics/' subdirectories.
+`r/code` folder contains the R code used to generate all other figures and statistics in the `figures/` and `statistics/` subdirectories.
 
 `r/data` includes the processed data used for figure generation and statistics.
 
@@ -16,7 +16,7 @@ Code relating to figures and statistical tests, and data analyses is provided in
 
 `r/supplement` includes code and data to generate Supplementary Figures 9-12. 
 
-#### Dependencies :package:
+#### Dependencies
 The code in `r/` should be runnable on your local machine assuming the following dependencies:
 ```
 R (>= 3.6.0)
