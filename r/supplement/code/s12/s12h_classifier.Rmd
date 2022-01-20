@@ -1,5 +1,5 @@
 ---
-title: "endpoint classifier"
+title: "s12h classifier"
 author: "Emily Kubota"
 date: "1/11/2022"
 output: html_document
@@ -9,7 +9,7 @@ output: html_document
 # load in relevant functions & data 
 library("tidyverse")
 source("../../../code/classifier/endpoint_correlation_classifier.R")
-df <- read.csv('../../../data/endpoint_data_wide.csv')
+df <- read.csv('../../data/endpoint_data_motion_excluded_wide.csv')
 ```
 
 ```{r}
@@ -19,6 +19,6 @@ df.classification = endpoint_classifier_wrapper(df,hemi,roilist)
 ```
 
 ```{r}
-write_csv(df.classification,"../../data/s11b_classification.csv")
+write_csv(df.classification,"../../data/s12h_classification.csv")
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "s11e"
+title: "s10e"
 author: "Emily Kubota"
 date: "1/6/2022"
 output: html_document
@@ -17,7 +17,7 @@ theme_set(theme_classic())
 
 ```{r}
 # read in the data 
-df <- read.csv('../../../data/endpoint_data_vtc_excluded.csv')
+df <- read.csv('../../data/fascicle_data_motion_excluded.csv')
 ```
 
 ```{r}
@@ -25,12 +25,12 @@ df <- read.csv('../../../data/endpoint_data_vtc_excluded.csv')
 roilist <- c('mOTS-words','mFus-faces','pOTS-words','pFus-faces')
 
 #  make the correlation matrix 
-a<- func_correlation_matrix_across_subs(df,"kid",roilist,'lh',sc,1) 
-b<- func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,1) 
+a<- func_correlation_matrix_across_subs(df,"kid",roilist,'lh',sc,0) 
+b<- func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,0) 
 a+b
 
 # save to figures folder
-ggsave(filename = "s11e.png",
+ggsave(filename = "s10e.png",
         width = 6,
          height = 3)
 ```
@@ -49,7 +49,7 @@ for (i in 1:length(roipairs)) {
     if ((i == 1) && (g == "kid")) {
       df.comparison <-
         tibble(
-          func_corrrelations_across_subs(df, roipairs[[i]], 'lh',1, g),
+          func_corrrelations_across_subs(df, roipairs[[i]], 'lh',0, g),
           comparison = comparison_labs[i],
           group = g,
           roipair = paste0(roipairs[[i]][1],
@@ -59,7 +59,7 @@ for (i in 1:length(roipairs)) {
     else{
       df.tmp <-
         tibble(
-          func_corrrelations_across_subs(df, roipairs[[i]], 'lh', 1, g),
+          func_corrrelations_across_subs(df, roipairs[[i]], 'lh', 0, g),
           comparison = comparison_labs[i],
           group = g,
           roipair = paste0(roipairs[[i]][1],

@@ -8,10 +8,9 @@ output: html_document
 ```{r}
 # load in relevant functions & data 
 library("tidyverse")
+theme_set(theme_classic())
 source("../../../code/utils/classification_plot.R")
 df <- read.csv("../../data/s12f_classification.csv")
-# set the default ggplot theme 
-theme_set(theme_classic())
 ```
 
 ```{r}
@@ -34,6 +33,7 @@ df %>%
 ```
 
 ```{r}
+
 # test whether we can classify above chance for cyto
 
 cyto_kid <- 
@@ -77,3 +77,4 @@ t.test(cat_adult,mu=50)
 
 
 ```
+

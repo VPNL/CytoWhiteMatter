@@ -1,42 +1,80 @@
 ---
-title: "S10b"
+title: "s10b"
 author: "Emily Kubota"
-date: "1/6/2022"
+date: "1/11/2022"
 output: html_document
 ---
 
 ```{r}
-# load in relevant functions & packages 
+# load in relevant functions & data 
 library("tidyverse")
-source("endpoint_line_plot.R")
-# set the default ggplot theme 
 theme_set(theme_classic())
+source("../../../code/utils/classification_plot.R")
+df <- read.csv("../../data/s10b_classification.csv")
 ```
 
 ```{r}
-# read in the data 
-df <- read.csv('../../data/endpoint_data_rh.csv')
-```
+# make the plot 
+df %>% 
+  classification_plot()
 
-
-```{r}
-# line plot for endpoints 
-
-# get the list of glasser rois ordered by lobe 
-foo <- fct_reorder(df$atlas_roi,df$lobe,min)
-tmp <- levels(foo)
-
-df.atlas_codes <- tibble(atlas_roi = tmp,
-                         roi_code = 1:180)
-
-df <- merge(df,df.atlas_codes,by="atlas_roi")
-
+# save to figures folder
+ggsave(filename = 
+           paste0("s10b.png"),
+        width = 6,
+         height = 3)
 ```
 
 ```{r}
-endpoint_line_plot(df,"adult")+ggtitle("Adults")
-ggsave(filename = "s10b.png",
-        width = 2.5,
-         height = 5)
+df %>% 
+  filter(classified_by %in% c("Cytoarchitecture","Category")) %>% 
+  lmerTest::lmer(.,formula = Accuracy ~ classified_by * Group + (1|subject)) %>% 
+  anova()
+```
+
+```{r}
+
+# test whether we can classify above chance for cyto
+
+cyto_kid <- 
+df %>% 
+  filter(classified_by == 'Cytoarchitecture',
+         Group == 'Children') %>% 
+  select(Accuracy) 
+  
+t.test(cyto_kid,mu=50)
+
+cyto_adult <- 
+df %>% 
+  filter(classified_by == 'Cytoarchitecture',
+         Group == 'Adults') %>% 
+  select(Accuracy) 
+  
+t.test(cyto_adult,mu=50)
+
 
 ```
+
+```{r}
+
+# test whether we can classify above chance for cat
+
+cat_kid <- 
+df %>% 
+  filter(classified_by == 'Category',
+         Group == 'Children') %>% 
+  select(Accuracy) 
+  
+t.test(cat_kid,mu=50)
+
+cat_adult <- 
+df %>% 
+  filter(classified_by == 'Category',
+         Group == 'Adults') %>% 
+  select(Accuracy) 
+  
+t.test(cat_adult,mu=50)
+
+
+```
+

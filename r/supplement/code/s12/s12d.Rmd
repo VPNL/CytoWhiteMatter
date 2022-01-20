@@ -1,5 +1,5 @@
 ---
-title: "s12b"
+title: "s12d"
 author: "Emily Kubota"
 date: "1/11/2022"
 output: html_document
@@ -8,10 +8,9 @@ output: html_document
 ```{r}
 # load in relevant functions & data 
 library("tidyverse")
+theme_set(theme_classic())
 source("../../../code/utils/classification_plot.R")
 df <- read.csv("../../data/s12d_classification.csv")
-# set the default ggplot theme 
-theme_set(theme_classic())
 ```
 
 ```{r}
@@ -32,7 +31,9 @@ df %>%
   lmerTest::lmer(.,formula = Accuracy ~ classified_by * Group + (1|subject)) %>% 
   anova()
 ```
+
 ```{r}
+
 # test whether we can classify above chance for cyto
 
 cyto_kid <- 
@@ -53,6 +54,7 @@ t.test(cyto_adult,mu=50)
 
 
 ```
+
 ```{r}
 
 # test whether we can classify above chance for cat
@@ -75,3 +77,4 @@ t.test(cat_adult,mu=50)
 
 
 ```
+

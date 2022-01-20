@@ -1,5 +1,5 @@
 ---
-title: "s11h"
+title: "s12h"
 author: "Emily Kubota"
 date: "1/11/2022"
 output: html_document
@@ -10,7 +10,7 @@ output: html_document
 library("tidyverse")
 theme_set(theme_classic())
 source("../../../code/utils/classification_plot.R")
-df <- read.csv("../../data/s11h_classification.csv")
+df <- read.csv("../../data/s12h_classification.csv")
 ```
 
 ```{r}
@@ -20,7 +20,7 @@ df %>%
 
 # save to figures folder
 ggsave(filename = 
-           paste0("s11h.png"),
+           paste0("s12h.png"),
         width = 6,
          height = 3)
 ```

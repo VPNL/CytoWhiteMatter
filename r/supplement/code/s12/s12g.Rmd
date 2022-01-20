@@ -1,5 +1,5 @@
 ---
-title: "s11g"
+title: "s12g"
 author: "Emily Kubota"
 date: "1/6/2022"
 output: html_document
@@ -30,7 +30,7 @@ b<- func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,1)
 a+b
 
 # save to figures folder
-ggsave(filename = "s11g.png",
+ggsave(filename = "s12g.png",
         width = 6,
          height = 3)
 ```
