@@ -45,8 +45,8 @@ df.distance %>%
     legend.text = element_text(size = 12),
     legend.title = element_text(size = 12),
     aspect.ratio = 1,
-    text = element_text(size = 20),
-    element_line(size = 1)
+    text = element_text(size = 20)#,
+    #element_line(size = 1)
   ) +
   coord_cartesian(ylim = c(0, 25)) +
   scale_fill_manual(values = c("white", "gray")) +
@@ -56,6 +56,12 @@ df.distance %>%
 # save to figures folder
 ggsave(filename = 
            paste0("fig3a.png"),
+        width = 6,
+         height = 4)
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig3a.pdf"),
         width = 6,
          height = 4)
 ```

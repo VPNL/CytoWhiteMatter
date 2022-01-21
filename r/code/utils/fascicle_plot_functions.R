@@ -84,8 +84,8 @@ fascicle_plot <- function(df,agegroup,hemi,dat_text){
       axis.ticks.x = element_blank(),
       legend.position = "none",
       aspect.ratio = 1,
-      text = element_text(size = 20),
-      element_line(size = 1)
+      text = element_text(size = 20)#,
+      # element_line(size = 1)
     ) +
     
     scale_fill_manual(values = c("#007f7f",

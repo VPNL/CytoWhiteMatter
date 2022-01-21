@@ -134,10 +134,16 @@ df %>%
 pots_adult<- pots_adult$Accuracy 
 t.test(pots_adult,mu=25)
 ```
+
 ```{r}
-# save to figures folder
+# save 
 ggsave(filename = 
            paste0("fig8a.png"),
+         width = 6,
+        height = 2.5)
+
+ggsave(filename = 
+           paste0("fig8a.pdf"),
          width = 6,
         height = 2.5)
 ```

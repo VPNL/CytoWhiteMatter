@@ -88,4 +88,8 @@ ggsave(filename = "s9d.png",
         width = 8,
          height = 4)
 
+ggsave(filename = "s9d.pdf",
+        width = 8,
+         height = 4)
+
 ```

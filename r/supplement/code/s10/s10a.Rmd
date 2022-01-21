@@ -31,7 +31,12 @@ a+b
 
 # save to figures folder
 ggsave(filename = "s10a.png",
-        width = 6,
+        width = 8,
+         height = 3)
+
+# save to figures folder
+ggsave(filename = "s10a.pdf",
+        width = 8,
          height = 3)
 ```
 

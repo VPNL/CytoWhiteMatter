@@ -39,4 +39,9 @@ ggsave(filename = "s11a.png",
         width = 2.5,
          height = 5)
 
+endpoint_line_plot(df,"kid")+ggtitle("Children")
+ggsave(filename = "s11a.pdf",
+        width = 2.5,
+         height = 5)
+
 ```

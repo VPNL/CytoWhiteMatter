@@ -112,6 +112,11 @@ ggsave(filename =
            "fig3d_children.png",
         width = 4,
          height = 4)
+
+ggsave(filename = 
+           "fig3d_children.pdf",
+        width = 4,
+         height = 4)
 ```
 
 ```{r}
@@ -119,7 +124,13 @@ ggsave(filename =
 func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,0)
 ggsave(filename = 
            "fig3d_adults.png",
-        width = 6,
+        width = 4,
+         height = 4)
+
+func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,0)
+ggsave(filename = 
+           "fig3d_adults.pdf",
+        width = 4,
          height = 4)
 ```
 

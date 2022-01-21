@@ -1,5 +1,5 @@
 ---
-title: "S9a"
+title: "S9b"
 author: "Emily Kubota"
 date: "1/6/2022"
 output: html_document
@@ -78,6 +78,11 @@ n_subs <- length(unique(foo$subject))
 # save to figures folder
 ggsave(filename = 
            paste0("s9b_",roiname,"_",agegroup,".png"),
+        width = 4,
+         height = 3)
+
+ggsave(filename = 
+           paste0("s9b_",roiname,"_",agegroup,".pdf"),
         width = 4,
          height = 3)
 }

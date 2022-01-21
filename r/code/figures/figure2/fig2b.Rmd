@@ -37,4 +37,9 @@ ggsave(filename =
            paste0("fig2b.png"),
         width = 4,
          height = 4)
+
+ggsave(filename = 
+           paste0("fig2b.pdf"),
+        width = 4,
+         height = 4)
 ```

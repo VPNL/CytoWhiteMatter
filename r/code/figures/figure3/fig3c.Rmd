@@ -43,8 +43,7 @@ ggplot(aes(x = tract,
           legend.position = "none",
           aspect.ratio=1,
           text = element_text(size=20),
-          axis.text.x = element_text(size = 8),
-          element_line(size=1)) +
+          axis.text.x = element_text(size = 8)) +
     scale_fill_manual(values = c("#007f7f", 
                                  "#cc4ccc", 
                                  "#cc0000",
@@ -77,6 +76,11 @@ ggsave(filename =
            "fig3c_children.png",
         width = 6,
          height = 4)
+
+ggsave(filename = 
+           "fig3c_children.pdf",
+        width = 6,
+         height = 4)
 ```
 
 ```{r}
@@ -84,6 +88,11 @@ ggsave(filename =
 fascicle_plot(df,"adult")
 ggsave(filename = 
            "fig3c_adults.png",
+        width = 6,
+         height = 4)
+
+ggsave(filename = 
+           "fig3c_adults.pdf",
         width = 6,
          height = 4)
 ```

@@ -80,6 +80,11 @@ ggsave(filename =
            paste0("s9a_",roiname,"_",agegroup,".png"),
         width = 4,
          height = 3)
+
+ggsave(filename = 
+           paste0("s9a_",roiname,"_",agegroup,".pdf"),
+        width = 4,
+         height = 3)
 }
 ```
 

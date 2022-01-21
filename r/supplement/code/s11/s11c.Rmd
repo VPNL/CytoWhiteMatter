@@ -15,7 +15,7 @@ theme_set(theme_classic())
 
 ```{r}
 # read in the data 
-df <- read.csv('../../data/fascicle_data_rh.csv')
+df <- read.csv('../../data/endpoint_data_rh.csv')
 ```
 
 ```{r}
@@ -47,7 +47,8 @@ if (age_group == "kid"){
   plt <-
   plt + ggtitle("Children") +
     theme(text = element_text(size =20),
-         legend.position = "none",
+           legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
@@ -81,10 +82,14 @@ plt +
 ```{r}
 roilist <- c('mFus-faces','pOTS-words','pFus-faces')
 
-# fascicles 
-func_correlation_matrix_across_subs(df,"adult",roilist,'rh',sc,0) 
+# endpoints 
+func_correlation_matrix_across_subs(df,"kid",roilist,'rh',sc,1) 
 
 ggsave(filename = "s11c.png",
+        width = 8,
+         height = 4)
+
+ggsave(filename = "s11c.pdf",
         width = 8,
          height = 4)
 

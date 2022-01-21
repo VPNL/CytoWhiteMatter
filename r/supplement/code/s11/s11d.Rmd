@@ -81,10 +81,14 @@ plt +
 ```{r}
 roilist <- c('mFus-faces','pOTS-words','pFus-faces')
 
-# fascicles 
+# endpoints
 func_correlation_matrix_across_subs(df,"adult",roilist,'rh',sc,1) 
 
 ggsave(filename = "s11d.png",
+        width = 8,
+         height = 4)
+
+ggsave(filename = "s11d.pdf",
         width = 8,
          height = 4)
 

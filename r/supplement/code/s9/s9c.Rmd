@@ -47,7 +47,9 @@ if (age_group == "kid"){
   plt <-
   plt + ggtitle("Children") +
     theme(text = element_text(size =20),
-         legend.position = "none",
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+       #  legend.position = "none",
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.background = element_blank())
@@ -85,6 +87,10 @@ roilist <- c('mFus-faces','pOTS-words','pFus-faces')
 func_correlation_matrix_across_subs(df,"kid",roilist,'rh',sc,0) 
 
 ggsave(filename = "s9c.png",
+        width = 8,
+         height = 4)
+
+ggsave(filename = "s9c.pdf",
         width = 8,
          height = 4)
 

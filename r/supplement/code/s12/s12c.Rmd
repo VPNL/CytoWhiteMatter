@@ -30,8 +30,13 @@ b<- func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,1)
 a+b
 
 # save to figures folder
-ggsave(filename = "s12c.png",
-        width = 6,
+ggsave(filename = "s12c.pdf",
+        width = 8,
+         height = 3)
+
+# save to figures folder
+ggsave(filename = "s12c.pdf",
+        width = 8,
          height = 3)
 ```
 
