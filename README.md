@@ -1,7 +1,7 @@
 # CytoWhiteMatter
 ** Kubota, E.,Grotheer, M., Finzi, D., Natu, V.S., Gomez, J., Grill-Spector,K. (2022).
 White matter connections of high-level visual areas predict cytoarchitecture 
-better than category-selectivity in childhood, but not adulthood. *Cerebral Cortex*. **
+better than category-selectivity in childhood, but not adulthood. Cerebral Cortex. **
 
 This repository contains code to analyze the data, compute statistics, and make the individual figure elements. 
 
