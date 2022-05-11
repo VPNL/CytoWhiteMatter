@@ -1,0 +1,41 @@
+---
+title: "Fig 3E"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+source("../../utils/cor_mat_functions.R")
+library("tidyverse")
+
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/fascicle_data.csv')
+df.wide <- read.csv('../../../data/fascicle_data_wide.csv')
+```
+
+```{r}
+# set the roi list 
+roilist <- c('mFus-faces','mOTS-words','pFus-faces','pOTS-words')
+
+#  make the correlation matrix 
+func_correlation_matrix_across_subs(df,"adult",roilist,'lh',sc,0,0) 
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig3e.png"),
+        width = 4,
+         height = 4)
+
+ggsave(filename = 
+           paste0("fig3e.pdf"),
+        width = 4,
+         height = 4)
+```
+

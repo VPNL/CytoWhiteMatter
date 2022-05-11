@@ -1,0 +1,136 @@
+---
+title: "Fig 9d"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+source("../../utils/cor_mat_functions.R")
+library("tidyverse")
+
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/endpoint_data.csv')
+
+```
+
+```{r}
+# get the list of glasser rois ordered by lobe 
+foo <- fct_reorder(df$atlas_roi,df$lobe,min)
+tmp <- levels(foo)
+
+df.atlas_codes <- tibble(atlas_roi = tmp,
+                         roi_code = 1:180)
+
+df <- merge(df,df.atlas_codes,by="atlas_roi")
+```
+
+
+```{r}
+endpoint_line_plot <- function(df,agegroup){
+  plt <- df %>% 
+    filter(group == agegroup,
+           roi %in% c("mOTS-words","mFus-faces","CoS-places","OTS-bodies")) %>% 
+    ggplot(aes(x = roi_code,
+               y = endpoint_proportion,
+               color = roi)) +
+               geom_segment(aes(x = 73,
+                                y = -.000005,
+                                xend = 73,
+                                yend = .00008),
+                                colour = "#000000",
+                                size = .25,
+                                linetype = 2)+
+               geom_segment(aes(x = 73+47,
+                                y = -.000005,
+                                xend = 73+47,
+                                yend = .00008),
+                                colour = "#000000",
+                                size = .25,
+                                linetype = 2) +
+             geom_segment(aes(x = 73+47+39,
+                                y = -.000005,
+                                xend = 73+47+39,
+                                yend = .00008),
+                                colour = "#000000",
+                                size = .25,
+                                linetype = 2) +
+    geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs")) +
+    ylab("Mean Endpoint Proportion") +
+    xlab("Glasser ROI")+
+    theme( text = element_text(size=14),
+           axis.ticks.x=element_blank(),
+           legend.position = "none",
+           aspect.ratio = 2,
+           element_line(size = 1)) +
+    scale_color_manual(values =c("#4c9a2a","#ff9999","#8080ff","#ffe800")) +
+    coord_cartesian(ylim = c(-.000005,.00008), xlim = c(0,180)) +
+    geom_segment(aes(x = 0, 
+                     y = -.0000085, 
+                     xend = 73, 
+                     yend = -.0000085), 
+                 colour = "#cc0000",
+                 size =8) +
+    geom_segment(aes(x = 73, 
+                     y = -.0000085, 
+                     xend = 73+47, 
+                     yend = -.0000085), 
+                 colour = "#e57f00",
+                 size=8) +
+    geom_segment(aes(x = 73+47, 
+                     y = -.0000085, 
+                     xend = 73+47+39, 
+                     yend = -.0000085), 
+                 colour = "#cc4ccc",
+                 size=8) +
+    geom_segment(aes(x = 73+47+39, 
+                     y = -.0000085, 
+                     xend = 73+47+39+21, 
+                     yend = -.0000085), 
+                 colour = "#99cc19",
+                 size=8) +
+    geom_text(x=(73/2), y=-.0000072, label="f",color="black")+
+    geom_text(x=(73+(47/2)), y=-.0000065, label="p",color="black")+
+    geom_text(x=(73+47+(39/2)), y=-.000007, label="t",color="black")+
+    geom_text(x=(73+47+39+(21/2)), y=-.0000068, label="o",color="black")
+  
+  plt
+  
+}
+
+
+
+```
+
+```{r}
+endpoint_line_plot(df,"kid")+ggtitle("Children")
+ggsave(filename = 
+           paste0("fig9d_children.png"),
+        width = 2.5,
+         height = 5)
+
+ggsave(filename = 
+           paste0("fig9d_children.pdf"),
+        width = 2.5,
+         height = 5)
+
+endpoint_line_plot(df,"adult")+ggtitle("Adults")
+
+ggsave(filename = 
+           paste0("fig9d_adults.png"),
+        width = 2.5,
+         height = 5)
+
+ggsave(filename = 
+           paste0("fig9d_adults.pdf"),
+        width = 2.5,
+         height = 5)
+
+```
+

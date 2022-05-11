@@ -1,5 +1,5 @@
 ---
-title: "Fig 8B"
+title: "Fig 8b"
 author: "Emily Kubota"
 date: "1/6/2022"
 output: html_document
@@ -55,15 +55,15 @@ make_cmat = function(df, agegroup) {
           'mFus-faces' = '1',
           'mOTS-words' = '2',
           'pFus-faces' = '3',
-          'pOTS-words' = '4'
+          'pOTS-words' = '4',
         ),
       p_label_code =
         recode(
           predicted_label,
-          'mFus-faces' = '1',
-          'mOTS-words' = '2',
-          'pFus-faces' = '3',
-          'pOTS-words' = '4'
+          'mFus-faces' = '4',
+          'mOTS-words' = '3',
+          'pFus-faces' = '2',
+          'pOTS-words' = '1',
         )
     )
   
@@ -83,10 +83,10 @@ make_cmat = function(df, agegroup) {
   
   # assign row and column names "a = actual", "p = predicted"
   colnames(cmat) <-
-    c("mFus-faces",
+     rev(c("mFus-faces",
       "mOTS-words",
       "pFus-faces",
-      "pOTS-words") #actual
+      "pOTS-words")) #actual
   rownames(cmat) <-
     c("mFus-faces",
       "mOTS-words",
@@ -124,10 +124,10 @@ cmat_plot = function(cmat,legend){
            size = 2, color = "cyan") +
   annotate("segment",
            x = .3, xend = .3, y = .6, yend = 2.4,
-           size = 2, color = "magenta") +
+           size = 2, color = "cyan") +
   annotate("segment",
            x = .3, xend = .3, y = 2.6, yend = 4.4,
-           size = 2, color = "cyan")
+           size = 2, color = "magenta") 
   
   if (legend == 1){
   p+

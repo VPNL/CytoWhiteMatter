@@ -1,0 +1,47 @@
+---
+title: "S15b"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+library("tidyverse")
+source("endpoint_line_plot.R")
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../data/endpoint_data_rh.csv')
+```
+
+
+```{r}
+# line plot for endpoints 
+
+# get the list of glasser rois ordered by lobe 
+foo <- fct_reorder(df$atlas_roi,df$lobe,min)
+tmp <- levels(foo)
+
+df.atlas_codes <- tibble(atlas_roi = tmp,
+                         roi_code = 1:180)
+
+df <- merge(df,df.atlas_codes,by="atlas_roi")
+
+```
+
+```{r}
+endpoint_line_plot(df,"adult")+ggtitle("Adults")
+ggsave(filename = "s15b.png",
+        width = 2.5,
+         height = 5)
+
+endpoint_line_plot(df,"adult")+ggtitle("Adults")
+ggsave(filename = "s15b.pdf",
+        width = 2.5,
+         height = 5)
+
+```

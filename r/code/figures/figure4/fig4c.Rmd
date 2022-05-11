@@ -1,0 +1,101 @@
+---
+title: "Fig 4C"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+library("tidyverse")
+
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/distance_fascicles.csv')
+```
+
+```{r}
+fascicle_plot <- function(df,age_group){
+  
+plt <- df %>% 
+  filter(group == age_group) %>% 
+ggplot(aes(x = tract,
+               y = percentage,
+               fill = tract)) +
+    stat_summary(fun = "mean",
+                 geom = "bar") +
+    stat_summary(fun.data = "mean_se",
+                 geom = "linerange",
+                 size = 1,
+                 color = "black") +
+    geom_point(alpha = 0.3,
+               position = position_jitter(height = 0, width = 0.1),
+               color ="gray",
+               size = 2) +
+    labs(x=element_blank(),y=("Percentage")) +
+    theme(axis.title.x=element_blank(),
+         # axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          legend.position = "none",
+          aspect.ratio=1,
+          text = element_text(size=20),
+          axis.text.x = element_text(size = 8)) +
+    scale_fill_manual(values = c("#007f7f", 
+                                 "#cc4ccc", 
+                                 "#cc0000",
+                                 "#e57f00",
+                                 "#99cc19")) +
+  facet_wrap(~roi,nrow=1,ncol=3)+
+    ylim(0,100) 
+ if (age_group == "kid"){
+   plt + ggtitle("Children")
+ }
+if (age_group == "adult"){
+   plt + ggtitle("Adults")
+ }
+}
+
+```
+
+```{r}
+# change the order of the fascicles 
+df <- 
+  df %>% 
+  mutate(tract = fct_relevel(tract, "IFOF","ILF","AF","pAF","VOF"),
+         group = fct_relevel(group,"kid","adult"),
+         roi = fct_relevel(roi,"FG2-mid","FG4-mid","FG4-ant"))
+```
+
+```{r}
+# upper panel (children)
+fascicle_plot(df,"kid")
+ggsave(filename = 
+           "fig4c_children.png",
+        width = 6,
+         height = 4)
+
+ggsave(filename = 
+           "fig4c_children.pdf",
+        width = 6,
+         height = 4)
+```
+
+```{r}
+# lower panel (adults)
+fascicle_plot(df,"adult")
+ggsave(filename = 
+           "fig4c_adults.png",
+        width = 6,
+         height = 4)
+
+ggsave(filename = 
+           "fig4c_adults.pdf",
+        width = 6,
+         height = 4)
+```
+
+

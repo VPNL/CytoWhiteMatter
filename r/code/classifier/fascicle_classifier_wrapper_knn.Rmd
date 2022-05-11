@@ -1,0 +1,252 @@
+---
+title: "correlation classifier"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & data 
+library("tidyverse")
+source("fascicle_correlation_classifier.R")
+df <- read.csv('../../data/fascicle_data_wide.csv')
+```
+
+
+```{r}
+roilist = c("mFus-faces","mOTS-words","pFus-faces","pOTS-words")
+hemi = 'lh'
+```
+
+```{r}
+fascicle_correlation_classifier = function(df,agegroup,classify_by){
+# inputs: df - wide dataframe with columns for fascicles, cyto, roi, subject, ect.
+#         age group - 'kid' or 'adult'
+#         classify_by - 'cyto', 'domain', or 'roi'
+# 
+# output: data frame with subject, classification accuracy for each split, 
+# actual label, predicted label, age group
+# 
+# 
+
+df <- 
+  df %>% 
+  filter(group == agegroup) 
+
+ if (classify_by == 'cyto'){
+   df <- 
+     df %>% 
+     mutate(grouping_var = cyto)
+ } 
+else if (classify_by == 'domain'){
+  df <- 
+     df %>% 
+    mutate(grouping_var = domain)
+} 
+else if (classify_by == 'roi'){
+  df <- 
+     df %>% 
+    mutate(grouping_var = roi)
+ }
+
+  
+actual_labels = rep(NA, dim(df)[1])
+predicted_labels = rep(NA, dim(df)[1])
+accuracy = rep(NA,dim(df),1)
+
+for (i in 1:dim(df)[1]){
+
+test_data = df[i,]
+test_subject = test_data$subject
+test_profile <- 
+  test_data %>% 
+  pivot_longer(!c(cyto,domain,roi,subject,hem,group,grouping_var),
+               names_to = "tract", 
+               values_to = "percentage") %>% 
+  select(percentage)
+
+# remove this subject from the training data 
+train_data <-
+  df %>% 
+  filter(subject != test_subject) 
+
+
+# get the mean connectivity profile for each label
+avg_profiles <- 
+train_data %>% 
+  group_by(grouping_var) %>% 
+  summarize(IFOF = mean(IFOF),
+            ILF = mean(ILF),
+            AF = mean(AF),
+            pAF = mean(pAF),
+            VOF = mean(VOF)) %>% 
+  pivot_longer(!grouping_var, 
+               names_to = "tract", 
+               values_to = "percentage") 
+
+# take the correlation between the test connectivity profile 
+# and the average for each label
+unique_labels <- unique(avg_profiles$grouping_var)
+correlations = rep(NA, length(unique_labels))
+
+for (l in 1:length(unique_labels)){
+  train_profile <-
+    avg_profiles %>% 
+    filter(grouping_var == unique_labels[l]) %>% 
+    select(percentage)
+  
+  correlations[l] = cor(train_profile,test_profile)
+}
+
+# predict the label of the test profile based on the maximum correlation  
+predicted_label = unique_labels[which.max(correlations)]
+predicted_labels[i] = toString(predicted_label)
+
+# record the actual label 
+actual_label = test_data$grouping_var
+actual_labels[i] = toString(actual_label)
+
+# finally record the accuracy 
+accuracy[i] = predicted_label == actual_label
+}
+
+df.classification = tibble(subject = df$subject, 
+                           actual_label = actual_labels, 
+                           predicted_label = predicted_labels,
+                           classified_by = classify_by,
+                           Group = agegroup,
+                           Accuracy = accuracy)
+}
+
+fascicle_classifier_wrapper = function(df,hemi,roilist){
+  # endpoint classifier wrapper
+  #     input: df - wide data frame with fascicle connectivity profile
+  #            hemi - 'lh' or 'rh'
+  #            roilist - functional rois to use (e.g., mFus-faces)
+  #      output: df.classification - df with classification accuracy
+  #
+  #
+df <-
+  df %>%
+  filter(hem == hemi,
+         roi %in% roilist)
+
+
+kid_cyto <- fascicle_correlation_classifier(df,'kid','cyto')
+kid_domain <- fascicle_correlation_classifier(df,'kid','domain')
+kid_roi <- fascicle_correlation_classifier(df,'kid','roi')
+
+
+adult_cyto <- fascicle_correlation_classifier(df,'adult','cyto')
+adult_domain <- fascicle_correlation_classifier(df,'adult','domain')
+adult_roi <- fascicle_correlation_classifier(df,'adult','roi')
+
+
+df.classification <-
+  rbind(kid_cyto,kid_domain,kid_roi, adult_cyto,adult_domain,adult_roi)
+
+  df.classification <-
+  df.classification %>%
+  mutate(classified_by =
+          recode(classified_by,
+                  cyto = "Cytoarchitecture",
+                  domain = "Category",
+                  roi = "ROI"),
+         Group =
+           recode(Group,
+                  kid = "Children",
+                  adult = "Adults"),
+         Accuracy = Accuracy*100)
+
+df.classification
+}
+```
+
+```{r}
+agegroup = 'kid'
+classify_by = 'cyto'
+k = 5
+
+df <- 
+  df %>% 
+  filter(group == agegroup) 
+
+ if (classify_by == 'cyto'){
+   df <- 
+     df %>% 
+     mutate(grouping_var = cyto)
+ } else if (classify_by == 'domain'){
+  df <- 
+     df %>% 
+    mutate(grouping_var = domain)
+} else if (classify_by == 'roi'){
+  df <- 
+     df %>% 
+    mutate(grouping_var = roi)
+}
+
+actual_labels = rep(NA, dim(df)[1])
+predicted_labels = rep(NA, dim(df)[1])
+accuracy = rep(NA,dim(df),1)
+
+for (i in 1:dim(df)[1]){
+test_data = df[i,]
+test_subject = test_data$subject
+test_profile <- 
+  test_data %>% 
+  pivot_longer(!c(cyto,domain,roi,subject,hem,group,grouping_var),
+               names_to = "tract", 
+               values_to = "percentage") %>% 
+  select(percentage)
+
+euc.dist <- function(x1, x2){
+  sqrt(sum((x1 - x2) ^ 2))
+}
+# remove this subject from the training data 
+train_data <-
+  df %>% 
+  filter(subject != test_subject) 
+
+dist_mat = rep(NA,dim(train_data),1)
+for (t in 1:dim(train_data)[1]){ 
+train_profile <- 
+  train_data[t,] %>% 
+  pivot_longer(!c(cyto,domain,roi,subject,hem,group,grouping_var),
+               names_to = "tract", 
+               values_to = "percentage") %>% 
+  select(percentage)
+dist_mat[t] <- euc.dist(test_profile,train_profile)
+}
+
+train_data <- 
+  train_data %>% 
+  mutate(distance = dist_mat)
+
+# sort the mattrix by the distance 
+train_data <- arrange(train_data,distance)
+
+# get the k nearest neighbors 
+train_data <- head(train_data,k)
+
+# get the predicted label based on the k nearest neighbors
+predicted_label <-sort(table(train_data$grouping_var),decreasing=TRUE)
+predicted_label <- names(label[1])
+predicted_labels[i] = predicted_label
+
+# record the actual label 
+actual_label = test_data$grouping_var
+actual_labels[i] = toString(actual_label)
+
+# finally record the accuracy 
+accuracy[i] = predicted_label == actual_label
+}
+
+df.classification = tibble(subject = df$subject, 
+                           actual_label = actual_labels, 
+                           predicted_label = predicted_labels,
+                           classified_by = classify_by,
+                           Group = agegroup,
+                           Accuracy = accuracy)
+
+```
+

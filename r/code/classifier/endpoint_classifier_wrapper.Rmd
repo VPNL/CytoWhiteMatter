@@ -16,9 +16,9 @@ df <- read.csv('../../data/endpoint_data_wide.csv')
 roilist = c("mFus-faces","mOTS-words","pFus-faces","pOTS-words")
 hemi = 'lh'
 df.classification = endpoint_classifier_wrapper(df,hemi,roilist)
-```
 
-```{r}
 write_csv(df.classification,"../../data/endpoint_classification.csv")
 ```
+
+
 

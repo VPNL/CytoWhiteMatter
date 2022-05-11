@@ -1,0 +1,71 @@
+---
+title: "cyto functional overlap"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+library("tidyverse")
+
+df <- read.csv('../../data/froi_croi_overlap.csv')
+```
+
+```{r}
+df <-
+df %>% 
+  mutate(froi = recode(froi,
+                       'mFus_Faces_cc3' = 'mFus-faces',
+                       'mOTS_word_cc3' = 'mOTS-words',
+                       'pFus_Faces_cc3' = 'pFus-faces',
+                       'pOTS_word_cc3' = 'pOTS-words',
+                       'OTS_Bodies_cc3' = 'OTS-bodies',
+                        'PPA_Placeshouses_cc3' = 'CoS-places'),
+         Group = recode(group,
+                        'kid' = 'Children',
+                        'adult' = 'Adults')) %>%
+  mutate(Group = fct_relevel(Group, c("Children","Adults")))
+  
+```
+
+```{r}
+df.tmp <- 
+df %>% 
+  filter(hemi == 'lh',
+         froi == "mOTS-words") 
+
+lm1 <- lm(formula = overlap ~ croi * group,data=df.tmp)
+anova(lm1)
+
+
+```
+
+```{r}
+df.tmp <- 
+df %>% 
+  filter(froi == "mFus-faces") 
+
+lm1 <- lm(formula = overlap ~ croi * hemi * group,data=df.tmp)
+anova(lm1)
+```
+
+```{r}
+df.tmp <- 
+df %>% 
+  filter(froi == "pFus-faces") 
+
+lm1 <- lm(formula = overlap ~ croi * hemi * group,data=df.tmp)
+anova(lm1)
+```
+
+
+```{r}
+df.tmp <- 
+df %>% 
+  filter(froi == "pOTS-words") 
+
+lm1 <- lm(formula = overlap ~ croi * hemi * group,data=df.tmp)
+anova(lm1)
+```
+

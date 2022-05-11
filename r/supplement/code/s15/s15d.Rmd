@@ -1,0 +1,102 @@
+---
+title: "s15d"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & packages 
+library("tidyverse")
+source("../../../code/utils/cor_mat_functions.R")
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../data/endpoint_data_rh.csv')
+```
+
+```{r}
+func_correlation_matrix_across_subs = function(df,age_group,roilist,hemi,sc,endpoint){
+
+  df <-
+    df %>%
+    filter(group == age_group)
+  
+mat <- matrix(,nrow=length(roilist),ncol=length(roilist))
+row_names = roilist
+col_names = rev(roilist)
+rownames(mat) <- row_names
+colnames(mat) <- col_names
+for (r in 1:length(row_names)){
+  for (j in 1:length(col_names)){
+    tmp = func_corrrelations_across_subs(df,c(row_names[r],col_names[j]),hemi,endpoint,age_group)
+    mat[r,j] = mean(tmp$correlation)
+  }
+}
+
+plt <-
+ mat %>%
+  ggcorrplot(#type="lower",
+             legend.title="correlation",
+             tl.cex = 12) +
+  sc
+
+
+if (age_group == "kid"){
+  plt <-
+  plt + ggtitle("Children") +
+    theme(text = element_text(size =20),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+       #  legend.position = "none",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+}
+else if (age_group == "adult"){
+  plt <-
+  plt + ggtitle("Adults") +
+    theme(text = element_text(size =20),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+}
+
+plt +
+  annotate("segment",
+           x = .6, xend = 1.4, y = .3, yend = .3,
+           size = 2, color = "magenta") +
+  annotate("segment",
+           x = 1.6, xend = 3.4, y = .3, yend = .3,
+           size = 2, color = "cyan") +
+  annotate("segment",
+           x = .3, xend = .3, y = .6, yend = 2.4,
+           size = 2, color = "cyan") +
+  annotate("segment",
+           x = .3, xend = .3, y = 2.6, yend = 3.4,
+           size = 2, color = "magenta")
+}
+
+
+```
+
+```{r}
+roilist <- c('mFus-faces','pOTS-words','pFus-faces')
+
+# endpoints
+func_correlation_matrix_across_subs(df,"adult",roilist,'rh',sc,1) 
+
+ggsave(filename = "s15d.png",
+        width = 8,
+         height = 4)
+
+ggsave(filename = "s15d.pdf",
+        width = 8,
+         height = 4)
+
+```

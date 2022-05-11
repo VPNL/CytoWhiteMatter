@@ -12,13 +12,13 @@ source("fascicle_correlation_classifier.R")
 df <- read.csv('../../data/fascicle_data_wide.csv')
 ```
 
+
 ```{r}
 roilist = c("mFus-faces","mOTS-words","pFus-faces","pOTS-words")
 hemi = 'lh'
 df.classification = fascicle_classifier_wrapper(df,hemi,roilist)
-```
 
-```{r}
 write_csv(df.classification,"../../data/fascicle_classification.csv")
 ```
+
 

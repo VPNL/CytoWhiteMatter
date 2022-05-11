@@ -2,6 +2,7 @@
 library("RColorBrewer")
 library("rlist")
 library("ggcorrplot")
+library("DescTools")
 
 # make a color map for our correlation matrices
 yellowrd <- rev(brewer.pal(n=9, name= "YlOrRd"))
@@ -72,6 +73,9 @@ for (i in 1:length(subs)){
     dist1 <- roi1$endpoint_proportion
   }
   else{
+      roi1 <-
+      roi1 %>%
+        arrange(match(tract, c("IFOF","ILF","AF","pAF","VOF")))
   dist1 <- roi1$percentage
   }
   
@@ -84,6 +88,9 @@ for (i in 1:length(subs)){
     dist2 <- roi2$endpoint_proportion
   }
   else{
+      roi2 <-
+      roi2 %>%
+        arrange(match(tract, c("IFOF","ILF","AF","pAF","VOF")))
       dist2 <- roi2$percentage
   }
   corr_list = list.append(corr_list,cor(dist1,dist2))
@@ -122,6 +129,9 @@ for (i in 1:length(subs)){
     dist1 <- roi1$endpoint_proportion
   }
   else{
+      roi1 <-
+      roi1 %>%
+        arrange(match(tract, c("IFOF","ILF","AF","pAF","VOF")))
   dist1 <- roi1$percentage
   }
   
@@ -134,56 +144,9 @@ for (i in 1:length(subs)){
     dist2 <- roi2$endpoint_proportion
   }
   else{
-      dist2 <- roi2$percentage
-  }
-  corr_list = list.append(corr_list,FisherZ(cor(dist1,dist2)))
-  sub_list = list.append(sub_list,subs[i])
-}
-x <- unlist(corr_list[!is.na(corr_list)])
-y <- unlist(sub_list)
-df.correlations = tibble(
-  correlation = x,
-  subject = y)
-}
-
-# fisher transformed correlations
-
-func_corrrelations_across_subs_fisher = function(df,roinames,hemi,endpoint,age_group){
-  
- df <-
-  df %>%
-    filter(group == age_group)
- 
-df_tmp <-func_exclude_subs_with_missing_rois(df,roinames,hemi)
-
-  
-subs = unique(df_tmp$subject)
-corr_list = list()
-sub_list = list()
-
-for (i in 1:length(subs)){
-  
-  roi1<-
-    df_tmp %>%
-    filter(subject == subs[i],
-           roi==roinames[1],
-           hem == hemi)
-  if (endpoint == 1){
-    dist1 <- roi1$endpoint_proportion
-  }
-  else{
-  dist1 <- roi1$percentage
-  }
-  
-  roi2<-
-    df_tmp %>%
-    filter(subject == subs[i],
-           roi==roinames[2],
-           hem == hemi)
-  if (endpoint == 1){
-    dist2 <- roi2$endpoint_proportion
-  }
-  else{
+      roi2 <-
+      roi2 %>%
+        arrange(match(tract, c("IFOF","ILF","AF","pAF","VOF")))
       dist2 <- roi2$percentage
   }
   corr_list = list.append(corr_list,FisherZ(cor(dist1,dist2)))
@@ -197,25 +160,101 @@ df.correlations = tibble(
 }
 
 # make the correlation matrix 
-func_correlation_matrix_across_subs = function(df,age_group,roilist,hemi,sc,endpoint){
+func_correlation_matrix_across_subs = function(df,age_group,roilist,hemi,sc,endpoint,lab){
 
   df <-
     df %>%
     filter(group == age_group)
   
 mat <- matrix(,nrow=length(roilist),ncol=length(roilist))
-rownames(mat) <- roilist
-colnames(mat) <- roilist
-for (r in 1:length(roilist)){
-  for (j in 1:length(roilist)){
-    tmp = func_corrrelations_across_subs(df,c(roilist[r],roilist[j]),hemi,endpoint,age_group)
+row_names = roilist
+col_names = rev(roilist)
+rownames(mat) <- row_names
+colnames(mat) <- col_names
+for (r in 1:length(row_names)){
+  for (j in 1:length(col_names)){
+    tmp = func_corrrelations_across_subs(df,c(row_names[r],col_names[j]),hemi,endpoint,age_group)
+    mat[r,j] = mean(tmp$correlation)
+  }
+}
+
+if (lab == 0){
+plt <-
+ mat %>%
+ ggcorrplot(#type="lower",
+             legend.title="correlation",
+             tl.cex = 12) +
+  sc
+}
+else{
+    plt <-
+    mat %>%
+    ggcorrplot(#type="lower",
+                legend.title="correlation",
+                tl.cex = 12,
+                lab = 'TRUE') +
+     sc
+}
+
+
+if (age_group == "kid"){
+  plt <-
+  plt + ggtitle("Children") +
+    theme(text = element_text(size =20),
+         legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+}
+else if (age_group == "adult"){
+  plt <-
+  plt + ggtitle("Adults") +
+    theme(text = element_text(size =20),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+}
+
+plt +
+  annotate("segment",
+           x = .6, xend = 2.4, y = .3, yend = .3,
+           size = 2, color = "magenta") +
+  annotate("segment",
+           x = 2.6, xend = 4.4, y = .3, yend = .3,
+           size = 2, color = "cyan") +
+  annotate("segment",
+           x = .3, xend = .3, y = .6, yend = 2.4,
+           size = 2, color = "magenta") +
+  annotate("segment",
+           x = .3, xend = .3, y = 2.6, yend = 4.4,
+           size = 2, color = "cyan")
+}
+
+# make the correlation matrix for all rois
+func_correlation_matrix_across_subs_all_rois = function(df,age_group,roilist,hemi,sc,endpoint){
+
+  df <-
+    df %>%
+    filter(group == age_group)
+  
+mat <- matrix(,nrow=length(roilist),ncol=length(roilist))
+row_names = roilist
+col_names = rev(roilist)
+rownames(mat) <- row_names
+colnames(mat) <- col_names
+for (r in 1:length(row_names)){
+  for (j in 1:length(col_names)){
+    tmp = func_corrrelations_across_subs(df,c(row_names[r],col_names[j]),hemi,endpoint,age_group)
     mat[r,j] = mean(tmp$correlation)
   }
 }
 
 plt <-
  mat %>%
-  ggcorrplot(type="lower",
+ ggcorrplot(#type="lower",
              legend.title="correlation",
              tl.cex = 12) +
   sc
@@ -245,14 +284,84 @@ else if (age_group == "adult"){
 plt +
   annotate("segment",
            x = .6, xend = 1.4, y = .3, yend = .3,
-           size = 2, color = "magenta") +
+           size = 2, color = "green") +
   annotate("segment",
-           x = 1.6, xend = 3.4, y = .3, yend = .3,
+           x = 1.6, xend = 4.4, y = .3, yend = .3,
+           size = 2, color = "magenta") +
+ annotate("segment",
+           x = 4.6, xend = 6.4, y = .3, yend = .3,
            size = 2, color = "cyan") +
   annotate("segment",
-           x = .3, xend = .3, y = .6, yend = 2.4,
-           size = 2, color = "magenta") +
+           x = .3, xend = .3, y = 5.6, yend = 6.4,
+           size = 2, color = "green") +
   annotate("segment",
-           x = .3, xend = .3, y = 2.6, yend = 3.4,
+           x = .3, xend = .3, y = 2.6, yend = 5.4,
+           size = 2, color = "magenta") +
+ annotate("segment",
+            x = .3, xend = .3, y = .6, yend = 2.4,
            size = 2, color = "cyan")
 }
+
+# make the correlation matrix for all rois
+func_correlation_matrix_across_subs_ant_rois = function(df,age_group,roilist,hemi,sc,endpoint){
+
+  df <-
+    df %>%
+    filter(group == age_group)
+  
+mat <- matrix(,nrow=length(roilist),ncol=length(roilist))
+row_names = roilist
+col_names = rev(roilist)
+rownames(mat) <- row_names
+colnames(mat) <- col_names
+for (r in 1:length(row_names)){
+  for (j in 1:length(col_names)){
+    tmp = func_corrrelations_across_subs(df,c(row_names[r],col_names[j]),hemi,endpoint,age_group)
+    mat[r,j] = mean(tmp$correlation)
+  }
+}
+
+plt <-
+ mat %>%
+ ggcorrplot(#type="lower",
+             legend.title="correlation",
+             tl.cex = 12) +
+  sc
+
+
+if (age_group == "kid"){
+  plt <-
+  plt + ggtitle("Children") +
+    theme(text = element_text(size =20),
+         legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+}
+else if (age_group == "adult"){
+  plt <-
+  plt + ggtitle("Adults") +
+    theme(text = element_text(size =20),
+        legend.title=element_text(size=8),
+        legend.text=element_text(size=8),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+}
+
+plt +
+  annotate("segment",
+           x = .6, xend = 1.4, y = .3, yend = .3,
+           size = 2, color = "green") +
+  annotate("segment",
+           x = 1.6, xend = 4.4, y = .3, yend = .3,
+           size = 2, color = "magenta") +
+  annotate("segment",
+           x = .3, xend = .3, y = 3.6, yend = 4.4,
+           size = 2, color = "green") +
+  annotate("segment",
+           x = .3, xend = .3, y = .6, yend = 3.4,
+           size = 2, color = "magenta")
+}
+

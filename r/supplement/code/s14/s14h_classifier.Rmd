@@ -1,0 +1,49 @@
+---
+title: "s14h classifier"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions & data 
+library("tidyverse")
+source("../../../code/classifier/fascicle_correlation_classifier.R")
+df <- read.csv('../../../data/fascicle_data_wide.csv')
+df.age <- read.csv('../../../data/age_mapping.csv')
+```
+
+```{r}
+# wrangle and combine dataframes 
+df.age <- 
+  df.age %>% 
+  mutate(subject = sessid)
+
+df <- merge(df,df.age)
+
+```
+
+```{r}
+df <-
+df %>% 
+  filter(age >= 9) %>% 
+  filter(age < 12 | age > 18)
+
+df <-
+df %>% 
+  select(-c(sessid,anatid,fsid,age))
+
+```
+
+```{r}
+roilist = c("mFus-faces","mOTS-words","pFus-faces","pOTS-words")
+hemi = 'lh'
+df.classification = fascicle_classifier_wrapper(df,hemi,roilist)
+```
+
+
+
+```{r}
+write_csv(df.classification,"../../data/s14h_classification.csv")
+```
+

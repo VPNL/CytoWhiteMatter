@@ -1,0 +1,111 @@
+---
+title: "endpoint classification"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+library("tidyverse")
+source("../utils/cor_mat_functions.R")
+
+df = read_csv("../../data/endpoint_classification.csv",
+              col_types = cols())
+```
+
+```{r}
+# get mean classification accuracy for reporting 
+
+df %>% 
+  filter(classified_by %in% c("Cytoarchitecture","Category")) %>% 
+  group_by(classified_by,Group) %>% 
+  summarize(mean_accuracy = mean(Accuracy),
+            sd_accuracy = sd(Accuracy))
+  
+```
+
+```{r}
+# test whether we can classify above chance for cyto classification
+
+cyto_kid <- 
+df %>% 
+  filter(classified_by == 'Cytoarchitecture',
+         Group == 'Children') %>% 
+  select(Accuracy) 
+  
+t.test(cyto_kid,mu=50)
+
+cyto_adult <- 
+df %>% 
+  filter(classified_by == 'Cytoarchitecture',
+         Group == 'Adults') %>% 
+  select(Accuracy) 
+  
+t.test(cyto_adult,mu=50)
+
+
+```
+
+```{r}
+# test whether we can classify above chance for category classification
+
+cat_kid <- 
+df %>% 
+  filter(classified_by == 'Category',
+         Group == 'Children') %>% 
+  select(Accuracy) 
+  
+t.test(cat_kid,mu=50)
+
+cat_adult <- 
+df %>% 
+  filter(classified_by == 'Category',
+         Group == 'Adults') %>% 
+  select(Accuracy) 
+  
+t.test(cat_adult,mu=50)
+
+
+```
+
+
+```{r}
+
+# LMM 
+
+df %>% 
+  filter(classified_by %in% c("Cytoarchitecture","Category")) %>% 
+  lmerTest::lmer(.,formula = Accuracy ~ classified_by * Group + (1|subject)) %>% 
+  anova()
+```
+
+```{r}
+# binomial logistic regression
+
+df %>% 
+  filter(classified_by %in% c("Cytoarchitecture","Category")) %>% 
+   mutate(Accuracy = Accuracy/100) %>% 
+  glm(.,formula = Accuracy ~ classified_by * Group,
+      family = "binomial") %>% 
+  summary()
+```
+
+
+
+```{r}
+# test if cyto is classified better for kids 
+
+t.test(cyto_kid$Accuracy,cat_kid$Accuracy,paired = TRUE)
+
+```
+
+```{r}
+# test if cyto is classified better for adults 
+
+t.test(cyto_adult$Accuracy,cat_adult$Accuracy,paired = TRUE)
+
+```
+
+
+

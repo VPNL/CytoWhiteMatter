@@ -22,10 +22,10 @@ df.wide <- read.csv('../../../data/endpoint_data_wide.csv')
 
 ```{r}
 # set the roi list 
-roilist <- c('mOTS-words','mFus-faces','pOTS-words','pFus-faces')
+roilist <- c('mFus-faces','mOTS-words','pFus-faces','pOTS-words')
 
 #  make the correlation matrix 
-func_correlation_matrix_across_subs(df,"kid",roilist,'lh',sc,1) 
+func_correlation_matrix_across_subs(df,"kid",roilist,'lh',sc,1,0) 
 
 # save to figures folder
 ggsave(filename = 
@@ -35,6 +35,25 @@ ggsave(filename =
 
 ggsave(filename = 
            paste0("fig7c.pdf"),
+        width = 4,
+         height = 4)
+```
+
+```{r}
+# set the roi list 
+roilist <- c('mFus-faces','mOTS-words','pFus-faces','pOTS-words')
+
+#  make the correlation matrix 
+func_correlation_matrix_across_subs(df,"kid",roilist,'lh',sc,1,1) 
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig7c_labels.png"),
+        width = 4,
+         height = 4)
+
+ggsave(filename = 
+           paste0("fig7c_labels.pdf"),
         width = 4,
          height = 4)
 ```

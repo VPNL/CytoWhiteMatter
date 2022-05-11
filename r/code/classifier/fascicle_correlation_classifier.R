@@ -26,7 +26,8 @@ else if (classify_by == 'roi'){
   df <- 
      df %>% 
     mutate(grouping_var = roi)
- } 
+ }
+
   
 actual_labels = rep(NA, dim(df)[1])
 predicted_labels = rep(NA, dim(df)[1])
@@ -114,17 +115,19 @@ kid_cyto <- fascicle_correlation_classifier(df,'kid','cyto')
 kid_domain <- fascicle_correlation_classifier(df,'kid','domain')
 kid_roi <- fascicle_correlation_classifier(df,'kid','roi')
 
+
 adult_cyto <- fascicle_correlation_classifier(df,'adult','cyto')
 adult_domain <- fascicle_correlation_classifier(df,'adult','domain')
 adult_roi <- fascicle_correlation_classifier(df,'adult','roi')
 
-df.classification <-
-  rbind(kid_cyto,kid_domain,kid_roi,adult_cyto,adult_domain,adult_roi)
 
 df.classification <-
+  rbind(kid_cyto,kid_domain,kid_roi, adult_cyto,adult_domain,adult_roi)
+
+  df.classification <-
   df.classification %>%
   mutate(classified_by =
-           recode(classified_by,
+          recode(classified_by,
                   cyto = "Cytoarchitecture",
                   domain = "Category",
                   roi = "ROI"),

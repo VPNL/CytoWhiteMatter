@@ -1,0 +1,185 @@
+---
+title: "fascicle correlations"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+
+library("tidyverse")
+
+source("../utils/cor_mat_functions.R")
+
+df = read_csv("../../data/fascicle_data.csv",
+              col_types = cols())
+
+df.dist.kids = read_csv("../../data/roi_dist_kids.csv",
+              col_types = cols())
+
+df.dist.adults = read_csv("../../data/roi_dist_adults.csv",
+              col_types = cols())
+
+df.submapping = read_csv("../../data/dist2corr_submapping.csv",
+              col_types = cols())
+```
+
+```{r}
+# turn columns into factors 
+df <-
+  df %>% 
+  mutate(subject = as.factor(subject),
+         hem = as.factor(hem),
+         roi = as.factor(roi),
+         cyto = as.factor(cyto),
+         domain = as.factor(domain),
+         group = as.factor(group),
+         tract = as.factor(tract))
+  
+```
+
+```{r}
+# wrangle dist data frame
+df.dist <-
+  rbind(df.dist.adults,df.dist.kids)
+
+df.dist <- 
+  df.dist %>% 
+  mutate(roipair = recode(roipair,
+                          'faces' = 'mFus-faces_vs_pFus-faces',
+                          'words' = 'mOTS-words_vs_pOTS-words', 
+                          'FG2' = 'pFus-faces_vs_pOTS-words',
+                          'FG4' = 'mFus-faces_vs_mOTS-words'),
+         dist_id = subject)
+
+df.dist <-
+  merge(df.dist,df.submapping)
+  
+```
+
+```{r}
+# get the average correlations for reporting (non fisher transformed)
+
+roipairs = list(c('mFus-faces','mOTS-words'),
+                c('pFus-faces','pOTS-words'),
+                c('mFus-faces','pFus-faces'),
+                c('mOTS-words','pOTS-words'))
+comparison_labs = c("same_cyto","same_cyto","same_domain","same_domain")
+
+group = c("kid","adult")
+
+for (i in 1:length(roipairs)) {
+  for (g in group) {
+    if ((i == 1) && (g == "kid")) {
+      df.comparison <-
+        tibble(
+          func_corrrelations_across_subs(df, roipairs[[i]], 'lh',0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+    }
+    else{
+      df.tmp <-
+        tibble(
+          func_corrrelations_across_subs(df, roipairs[[i]], 'lh', 0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+      df.comparison <- rbind(df.comparison, df.tmp)
+    }
+  }
+}
+
+df.comparison %>% 
+  group_by(roipair,group) %>% 
+  summarize(mean_corr = mean(correlation),
+            sd_corr = sd(correlation))
+```
+
+
+```{r}
+# get the average correlations for stats (fisher transformed) 
+
+roipairs = list(c('mFus-faces','mOTS-words'),
+                c('pFus-faces','pOTS-words'),
+                c('mFus-faces','pFus-faces'),
+                c('mOTS-words','pOTS-words'))
+comparison_labs = c("same_cyto","same_cyto","same_domain","same_domain")
+
+group = c("kid","adult")
+
+for (i in 1:length(roipairs)) {
+  for (g in group) {
+    if ((i == 1) && (g == "kid")) {
+      df.comparison <-
+        tibble(
+          func_corrrelations_across_subs_fisher(df, roipairs[[i]], 'lh',0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+    }
+    else{
+      df.tmp <-
+        tibble(
+          func_corrrelations_across_subs_fisher(df, roipairs[[i]], 'lh', 0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+      df.comparison <- rbind(df.comparison, df.tmp)
+    }
+  }
+}
+
+df.comparison %>% 
+  group_by(roipair,group) %>% 
+  summarize(mean_corr = mean(correlation),
+            sd_corr = sd(correlation))
+```
+```{r}
+df.comparison <- 
+  df.comparison %>% 
+  mutate(corr_id = subject) 
+
+df.comparison <- merge(df.comparison,df.submapping)
+
+df.comparison <- merge(df.comparison,df.dist, by = c("roipair","corr_id"))
+```
+
+```{r}
+# fit the lmm anova 
+lm_c <- df.comparison %>% 
+  mutate(shared_factor = as.factor(comparison),
+         group = as.factor(group.x)) %>% 
+  lmerTest::lmer(.,formula = correlation ~ shared_factor * group + (1|corr_id)) 
+
+lm_c %>% 
+  anova()
+```
+
+```{r}
+# fit the lmm anova 
+lm_a <- df.comparison %>% 
+  mutate(shared_factor = as.factor(comparison),
+         group = as.factor(group.x)) %>% 
+  lmerTest::lmer(.,formula = correlation ~ shared_factor * group + distance + (1|corr_id)) 
+
+lm_a %>% 
+  anova()
+```
+
+```{r}
+anova(lm_c,lm_a)
+```
+
+
+
+

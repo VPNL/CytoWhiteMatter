@@ -1,0 +1,102 @@
+---
+title: "distance control"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+library("tidyverse")
+source("../utils/cor_mat_functions.R")
+
+df.distance = read_csv("../../data/distance.csv",
+              col_types = cols())
+
+df = read_csv("../../data/distance_fascicles.csv",
+              col_types = cols())
+```
+
+```{r}
+# make all variables factors 
+df <- 
+  df %>%
+  mutate(subject = as.factor(subject),
+         hem = as.factor(hem),
+         roi = as.factor(roi),
+         cyto = as.factor(cyto),
+         domain = as.factor(domain),
+         group = as.factor(group),
+         tract = as.factor(tract))
+```
+
+```{r}
+# Test whether there is a difference in distance between the groups 
+df.distance %>%
+  filter(type == "Functional ROI") %>%
+  lmerTest::lmer(formula = 'distance ~ Group * Cytoarchitecture + (1|subject)', data = .) %>%
+  anova()
+```
+
+```{r}
+# Check that there isn't a relationship between distance and cyto in the control ROIs
+
+df.distance %>%
+  filter(type == "Control ROI") %>%
+  lmerTest::lmer(formula = 'distance ~ Group * Cytoarchitecture + (1|subject)', data = .) %>%
+  anova()
+```
+
+
+```{r}
+# get the average correlations 
+
+roipairs = list(c('FG4-mid','FG4-ant'),
+                c('FG4-mid','FG2-mid'))
+
+comparison_labs = c("same_cyto","diff_cyto")
+
+group = c("kid","adult")
+
+for (i in 1:length(roipairs)) {
+  for (g in group) {
+    if ((i == 1) && (g == "kid")) {
+      df.comparison <-
+        tibble(
+          func_corrrelations_across_subs_fisher(df, roipairs[[i]], 'lh',0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+    }
+    else{
+      df.tmp <-
+        tibble(
+          func_corrrelations_across_subs_fisher(df, roipairs[[i]], 'lh', 0, g),
+          comparison = comparison_labs[i],
+          group = g,
+          roipair = paste0(roipairs[[i]][1],
+                           "_vs_", roipairs[[i]][2])
+        )
+      df.comparison <- rbind(df.comparison, df.tmp)
+    }
+  }
+}
+
+df.comparison %>% 
+  group_by(roipair,group) %>% 
+  summarize(mean_corr = mean(correlation),
+            sd_corr = sd(correlation))
+```
+
+```{r}
+# LMM Anova on correlation 
+df.comparison %>% 
+  mutate(same_diff_cyto = as.factor(comparison),
+         group = as.factor(group)) %>% 
+  lmerTest::lmer(.,formula = correlation ~ same_diff_cyto * group + (1|subject)) %>% 
+  anova()
+
+```
+```

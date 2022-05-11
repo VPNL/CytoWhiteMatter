@@ -5,6 +5,28 @@ endpoint_line_plot <- function(df,agegroup){
     ggplot(aes(x = roi_code,
                y = endpoint_proportion,
                color = roi)) +
+               geom_segment(aes(x = 73,
+                                y = -.000005,
+                                xend = 73,
+                                yend = .00008),
+                                colour = "#000000",
+                                size = .25,
+                                linetype = 2)+
+               geom_segment(aes(x = 73+47,
+                                y = -.000005,
+                                xend = 73+47,
+                                yend = .00008),
+                                colour = "#000000",
+                                size = .25,
+                                linetype = 2) +
+             geom_segment(aes(x = 73+47+39,
+                                y = -.000005,
+                                xend = 73+47+39,
+                                yend = .00008),
+                                colour = "#000000",
+                                size = .25,
+                                linetype = 2) +
+            
     geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs")) +
     ylab("Mean Endpoint Proportion") +
     xlab("Glasser ROI")+
@@ -39,10 +61,10 @@ endpoint_line_plot <- function(df,agegroup){
                      yend = -.0000085), 
                  colour = "#99cc19",
                  size=8) +
-    geom_text(x=(73/2), y=-.0000072, label="f",color="black")+
-    geom_text(x=(73+(47/2)), y=-.0000065, label="p",color="black")+
-    geom_text(x=(73+47+(39/2)), y=-.000007, label="t",color="black")+
-    geom_text(x=(73+47+39+(21/2)), y=-.0000068, label="o",color="black")
+    annotate("text",x=(73/2), y=-.0000072, label="f",color="black")+
+    annotate("text",x=(73+(47/2)), y=-.0000065, label="p",color="black")+
+    annotate("text",x=(73+47+(39/2)), y=-.000007, label="t",color="black")+
+    annotate("text",x=(73+47+39+(21/2)), y=-.0000068, label="o",color="black")
   
   plt
   

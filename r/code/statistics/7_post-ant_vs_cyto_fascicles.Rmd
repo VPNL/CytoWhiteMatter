@@ -1,0 +1,100 @@
+---
+title: "fascicle correlations"
+author: "Emily Kubota"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant libraries and data 
+
+library("tidyverse")
+source("../utils/cor_mat_functions.R")
+
+df = read_csv("../../data/fascicle_data.csv",
+              col_types = cols())
+
+
+```
+
+```{r}
+# turn columns into factors 
+df <-
+  df %>% 
+  mutate(subject = as.factor(subject),
+         hem = as.factor(hem),
+         roi = as.factor(roi),
+         cyto = as.factor(cyto),
+         domain = as.factor(domain),
+         group = as.factor(group),
+         tract = as.factor(tract))
+  
+```
+
+
+```{r}
+# get the average correlations for stats (fisher transformed) 
+
+roi_list = c("CoS-places","mFus-faces","mOTS-words","OTS-bodies")
+cyto = c("FG3","FG4","FG4","FG4")
+
+group = c("kid","adult")
+
+for (i in 1:length(roi_list)) {
+  for (j in 1:length(roi_list)){
+  for (g in group) {
+    if ((i == 1) && (j == 1) && (g == "kid")) {
+      df.comparison <-
+        tibble(
+          func_corrrelations_across_subs_fisher(df, c(roi_list[i],roi_list[j]), 'lh',0, g),
+          cyto1 = cyto[i],
+          cyto2 = cyto[j],
+          roi1 = roi_list[i],
+          roi2 = roi_list[j],
+          group = g,
+          roipair = paste0(roi_list[i],
+                           "_vs_", roi_list[j])
+        )
+    }
+    else{
+      df.tmp <-
+        tibble(
+          func_corrrelations_across_subs_fisher(df, c(roi_list[i],roi_list[j]), 'lh', 0, g),
+          cyto1 = cyto[i],
+          cyto2 = cyto[j],
+          roi1 = roi_list[i],
+          roi2 = roi_list[j],
+          group = g,
+          roipair = paste0(roi_list[i],
+                           "_vs_", roi_list[j])
+        )
+      df.comparison <- rbind(df.comparison, df.tmp)
+    }
+  }
+  }
+}
+
+df.comparison %>% 
+  group_by(roipair,group) %>% 
+  summarize(mean_corr = mean(correlation),
+            sd_corr = sd(correlation))
+```
+```{r}
+df.comparison <-
+df.comparison %>% 
+  # remove on diagonals 
+   filter(!(roi1 == roi2)) %>% 
+  mutate(same_cyto = (cyto1 == cyto2))
+
+```
+
+```{r}
+# fit the lmm anova 
+df.comparison %>% 
+  lmerTest::lmer(.,formula = correlation ~ same_cyto * group  + (1|subject)) %>% 
+  anova()
+```
+
+
+
+

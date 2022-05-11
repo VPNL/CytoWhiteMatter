@@ -1,0 +1,45 @@
+---
+title: "Fig 3B"
+author: "Emily Kubota"
+date: "1/6/2022"
+output: html_document
+---
+
+```{r}
+# load in relevant functions 
+source("../../utils/fascicle_plot_functions.R")
+library("tidyverse")
+# set the default ggplot theme 
+theme_set(theme_classic())
+```
+
+```{r}
+# read in the data 
+df <- read.csv('../../../data/fascicle_data.csv')
+df.wide <- read.csv('../../../data/fascicle_data_wide.csv')
+```
+
+```{r}
+# change the order of the fascicles 
+df <- 
+  df %>% 
+  mutate(tract = fct_relevel(tract, "IFOF","ILF","AF","pAF","VOF"),
+         group = fct_relevel(group,"kid","adult"))
+```
+
+```{r}
+# make the plot 
+dat_text <- get_roi_counts(df.wide,"kid","lh")
+fascicle_plot(df,"kid","lh",dat_text)
+
+# save to figures folder
+ggsave(filename = 
+           paste0("fig3b.png"),
+        width = 4,
+         height = 4)
+
+ggsave(filename = 
+           paste0("fig3b.pdf"),
+        width = 4,
+         height = 4)
+```
