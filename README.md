@@ -3,6 +3,9 @@
 White matter connections of high-level visual areas predict cytoarchitecture 
 better than category-selectivity in childhood, but not adulthood. *Cerebral Cortex.***
 
+[![DOI](https://zenodo.org/badge/449537684.svg)](https://zenodo.org/badge/latestdoi/449537684)
+
+
 This repository contains code to analyze the data, compute statistics, and make the individual figure elements. 
 
 #### Overall organization 
